@@ -1,0 +1,15 @@
+{
+  "name": "aclib",
+  "version": "0.0.1",
+  "repo": "SuzumiyaAoba/aclib",
+  "description": "Simple array list",
+  "keywords": [
+    "list",
+    "array",
+    "structure"
+  ],
+  "license": "MIT",
+  "src": [
+    "lib/array_list/array_list.h"
+  ]
+}
