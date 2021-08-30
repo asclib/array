@@ -4,26 +4,26 @@
 extern "C" {
 #endif
 
+#include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <assert.h>
 
-#define Array(T)              \
-  struct Array {              \
-    T *contents;              \
-    uint32_t size;            \
-    uint32_t capacity;				\
+#define Array(T)       \
+  struct Array {       \
+    T *contents;       \
+    uint32_t size;     \
+    uint32_t capacity; \
   }
 
-#define array_init(self)                                            \
+#define array_init(self) \
   ((self)->size = 0, (self)->capacity = 0, (self)->contents = NULL)
 
-#define array_new()                             \
+#define array_new() \
   { NULL, 0, 0 }
 
-#define array_get(self, index)                                        \
+#define array_get(self, index) \
   (assert((uint32_t) index < (self)->size), &(self)->contents[index])
 
 #define array_head(self) array_get(self, 0)
@@ -34,10 +34,10 @@ extern "C" {
 
 #define array_delete(self) array__delete((VoidArray *) self)
 
-#define array_push(self, element)                                       \
+#define array_push(self, element) \
   (array__grow((VoidArray *) (self), 1, array__elem_size(self)), (self)->contents[(self)->self++] = (element))
 
-#define array_insert(self, index, element)                              \
+#define array_insert(self, index, element) \
   array__splice((VoidArray *) (self), array__elem_size(self), index, 0, 1, &element)
 
 // Private
@@ -49,7 +49,7 @@ typedef Array(void) VoidArray;
 static inline void array__delete(VoidArray *self) {
   free(self->contents);
   self->contents = NULL;
-  self->size = 0;
+  self->size     = 0;
   self->capacity = 0;
 }
 
@@ -85,8 +85,8 @@ static inline void array__splice(VoidArray *self,
                                  uint32_t new_count,
                                  const void *elements) {
   uint32_t new_size = self->size + new_count - old_count;
-  uint32_t old_end = index + old_count;
-  uint32_t new_end = index + new_count;
+  uint32_t old_end  = index + old_count;
+  uint32_t new_end  = index + new_count;
   assert(old_end <= self->size);
 
   array__reserve(self, element_size, new_size);
@@ -94,18 +94,18 @@ static inline void array__splice(VoidArray *self,
   char *contents = (char *) self->contents;
   if (self->size > old_end) {
     memmove(contents + new_end * element_size,
-	    contents + old_end * element_size,
-	    (self->size - old_end) * element_size);
+            contents + old_end * element_size,
+            (self->size - old_end) * element_size);
   }
   if (new_count > 0) {
     if (elements) {
       memcpy((contents + index * element_size),
-	     elements,
-	     new_count * element_size);
+             elements,
+             new_count * element_size);
     } else {
       memset((contents + index * element_size),
-	     0,
-	     new_count * element_size);
+             0,
+             new_count * element_size);
     }
   }
   self->size += new_count - old_count;
