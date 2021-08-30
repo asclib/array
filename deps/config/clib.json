@@ -1,0 +1,12 @@
+{
+  "name": "config",
+  "version": "0.0.1",
+  "repo": "aclib/config",
+  "keywords": [
+    "aclib", "config"
+  ],
+  "license": "MIT",
+  "src": [
+    "src/config.h"
+  ]
+}
