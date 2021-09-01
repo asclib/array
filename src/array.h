@@ -10,18 +10,21 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#define Array(T)       \
-  struct Array {       \
-    T *contents;       \
-    uint32_t size;     \
-    uint32_t capacity; \
+#define Array(T)                      \
+  struct Array {                      \
+    T *contents;                      \
+    uint32_t size;                    \
+    uint32_t capacity;                \
+    void *(*malloc)(size_t);          \
+    void *(*realloc)(void *, size_t); \
+    void (*free)(void *);             \
   }
 
 #define array_init(self) \
-  ((self)->size = 0, (self)->capacity = 0, (self)->contents = NULL)
+  ((self)->size = 0, (self)->capacity = 0, (self)->malloc = malloc, (self)->realloc = realloc, (self)->free = free, (self)->contents = NULL)
 
 #define array_new() \
-  { NULL, 0, 0 }
+  { NULL, 0, 0, malloc, realloc, free }
 
 #define array_get(self, index) \
   (assert((uint32_t) index < (self)->size), &(self)->contents[index])
@@ -35,10 +38,15 @@ extern "C" {
 #define array_delete(self) array__delete((VoidArray *) self)
 
 #define array_push(self, element) \
-  (array__grow((VoidArray *) (self), 1, array__elem_size(self)), (self)->contents[(self)->self++] = (element))
+  (array__grow((VoidArray *) (self), 1, array__elem_size(self)), (self)->contents[(self)->size++] = (element))
 
 #define array_insert(self, index, element) \
   array__splice((VoidArray *) (self), array__elem_size(self), index, 0, 1, &element)
+
+#define array_grow_by(self, count)                                                 \
+  (array__grow((VoidArray *) (self), count, array__element_size(self)),            \
+   memset((self)->contents + (self)->size, 0, (count) *array__element_size(self)), \
+   (self)->size += (count))
 
 // Private
 
@@ -46,8 +54,12 @@ typedef Array(void) VoidArray;
 
 #define array__elem_size(self) sizeof(*(self)->contents)
 
+#define array__malloc(self) (self)->malloc
+#define array__realloc(self) (self)->realloc
+#define array__free(self) (self)->free
+
 static inline void array__delete(VoidArray *self) {
-  free(self->contents);
+  array__free(self)(self->contents);
   self->contents = NULL;
   self->size     = 0;
   self->capacity = 0;
@@ -56,9 +68,9 @@ static inline void array__delete(VoidArray *self) {
 static inline void array__reserve(VoidArray *self, size_t element_size, uint32_t new_capacity) {
   if (new_capacity > self->capacity) {
     if (self->contents) {
-      self->contents = realloc(self->contents, new_capacity * element_size);
+      self->contents = array__realloc(self)(self->contents, new_capacity * element_size);
     } else {
-      self->contents = malloc(new_capacity * element_size);
+      self->contents = array__malloc(self)(new_capacity * element_size);
     }
     self->capacity = new_capacity;
   }

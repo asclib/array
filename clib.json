@@ -1,12 +1,12 @@
 {
-  "name": "array_list",
+  "name": "array",
   "version": "0.0.1",
-  "repo": "asclib/array_list",
+  "repo": "asclib/array",
   "description": "Simple Array List",
   "keywords": ["structure", "array", "list"],
   "license": "MIT",
   "src": [
-    "src/array_list.h"
+    "src/array.h"
   ],
   "dependencies": {
   }

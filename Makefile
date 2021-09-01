@@ -43,4 +43,7 @@ uninstall:
 test:
 	@./test.sh
 
-.PHONY: test all clean install uninstall
+format:
+	clang-format -style=file -i src/*
+
+.PHONY: test all clean install uninstall format
